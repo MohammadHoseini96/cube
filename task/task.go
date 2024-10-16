@@ -15,16 +15,6 @@ import (
 	"time"
 )
 
-type State int
-
-const (
-	Pending State = iota
-	Scheduled
-	Running
-	Completed
-	Failed
-)
-
 type Task struct {
 	ID            uuid.UUID
 	ContainerID   string
@@ -169,7 +159,7 @@ func (d *Docker) Stop(id string) DockerResult {
 		id,
 		types.ContainerRemoveOptions{
 			RemoveVolumes: true,
-			RemoveLinks:   true,
+			RemoveLinks:   false,
 			Force:         false,
 		})
 	if err != nil {

@@ -2,6 +2,7 @@ package worker
 
 import (
 	"cube/task"
+	"errors"
 	"fmt"
 	"github.com/golang-collections/collections/queue"
 	"github.com/google/uuid"
@@ -20,8 +21,39 @@ func (w *Worker) CollectStats() {
 	fmt.Println("I will collect stats")
 }
 
-func (w *Worker) RunTask() {
-	fmt.Println("I will start or stop a task")
+func (w *Worker) AddTast(t task.Task) {
+	w.Queue.Enqueue(t)
+}
+
+func (w *Worker) RunTask() task.DockerResult {
+	t := w.Queue.Dequeue()
+	if t == nil {
+		log.Println("No tasks in the queue")
+		return task.DockerResult{Error: nil}
+	}
+
+	taskQueued := t.(task.Task)
+
+	taskPersisted := w.Db[taskQueued.ID]
+	if taskPersisted == nil {
+		w.Db[taskQueued.ID] = &taskQueued
+		taskPersisted = &taskQueued
+	}
+
+	var result task.DockerResult
+	if task.ValidateStateTransition(taskPersisted.State, taskQueued.State) {
+		switch taskQueued.State {
+		case task.Scheduled:
+			result = w.StartTask(taskQueued)
+		case task.Completed:
+			result = w.StopTask(taskQueued)
+		default:
+			result.Error = errors.New("we should not get here")
+		}
+	} else {
+		result.Error = fmt.Errorf("invalid transition from %v to %v", taskPersisted.State, taskQueued.State)
+	}
+	return result
 }
 
 func (w *Worker) StartTask(t task.Task) task.DockerResult {
@@ -50,6 +82,8 @@ func (w *Worker) StopTask(t task.Task) task.DockerResult {
 	result := d.Stop(t.ContainerID)
 	if result.Error != nil {
 		log.Printf("Error stopping container %v: %v", t.ContainerID, result.Error)
+		//t.State = task.Failed
+		//w.Db[t.ID] = &t
 		return result
 	}
 	t.FinishTime = time.Now()
