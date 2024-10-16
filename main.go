@@ -67,6 +67,14 @@ func main() {
 	}
 
 	fmt.Printf("node: %v\n", n)
+
+	fmt.Printf("create a test container\n")
+	dockerTask, createResult := task.CreateContainer()
+
+	time.Sleep(time.Second * 5)
+
+	fmt.Printf("stopping container %s\n", createResult.ContainerId)
+	_ = task.StopContainer(dockerTask, createResult.ContainerId)
 }
 
 //TIP See GoLand help at <a href="https://www.jetbrains.com/help/go/">jetbrains.com/help/go/</a>.
