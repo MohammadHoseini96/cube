@@ -24,7 +24,7 @@ func Test_worker_with_state_transition() {
 	}
 
 	fmt.Printf("starting the task: %v\n", t)
-	w.AddTast(t)
+	w.AddTask(t)
 	result := w.RunTask()
 	if result.Error != nil {
 		panic(result.Error.Error())
@@ -37,7 +37,7 @@ func Test_worker_with_state_transition() {
 
 	fmt.Printf("stopping task : %s\n", t.ID)
 	t.State = task.Completed
-	w.AddTast(t)
+	w.AddTask(t)
 	result = w.RunTask()
 	if result.Error != nil {
 		panic(result.Error.Error())

@@ -1,8 +1,6 @@
 package main
 
-import (
-	"cube/worker"
-)
+import "cube/worker"
 
 //TIP To run your code, right-click the code and select <b>Run</b>. Alternatively, click
 // the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.
@@ -17,7 +15,9 @@ func main() {
 	//fmt.Printf("stopping container %s\n", createResult.ContainerId)
 	//_ = task.StopContainer(dockerTask, createResult.ContainerId)
 
-	worker.Test_worker_with_state_transition()
+	//worker.Test_worker_with_state_transition()
+
+	worker.Serve_worker_with_api()
 }
 
 //TIP See GoLand help at <a href="https://www.jetbrains.com/help/go/">jetbrains.com/help/go/</a>.

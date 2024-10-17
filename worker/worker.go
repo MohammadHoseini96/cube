@@ -17,11 +17,19 @@ type Worker struct {
 	TaskCount int
 }
 
+func (w *Worker) GetTasks() []*task.Task {
+	tasks := []*task.Task{}
+	for _, task := range w.Db {
+		tasks = append(tasks, task)
+	}
+	return tasks
+}
+
 func (w *Worker) CollectStats() {
 	fmt.Println("I will collect stats")
 }
 
-func (w *Worker) AddTast(t task.Task) {
+func (w *Worker) AddTask(t task.Task) {
 	w.Queue.Enqueue(t)
 }
 
