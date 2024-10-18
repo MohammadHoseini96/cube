@@ -29,6 +29,7 @@ func Serve_worker_with_api() {
 	}
 
 	go runTask(&w)
+	go w.CollectStats()
 	api.Start()
 }
 
