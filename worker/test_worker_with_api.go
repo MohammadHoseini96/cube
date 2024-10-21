@@ -9,12 +9,9 @@ import (
 	"time"
 )
 
-func Serve_worker_with_api() {
+func Serve_worker_with_api(host string, port int) {
 	//host := os.Getenv("CUBE_HOST")
 	//port, _ := strconv.Atoi(os.Getenv("CUBE_PORT"))
-
-	host := "127.0.0.1"
-	port := 8080
 
 	fmt.Println("Starting Cube worker")
 
@@ -44,6 +41,6 @@ func runTask(w *Worker) {
 			log.Println("No tasks to process currently.")
 		}
 		log.Println("Sleeping for 6sec.")
-		time.Sleep(6 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
 }
