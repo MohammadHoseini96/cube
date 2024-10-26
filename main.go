@@ -19,11 +19,24 @@ func main() {
 
 	//host := os.Getenv("CUBE_HOST")
 	//port, _ := strconv.Atoi(os.Getenv("CUBE_PORT"))
-	host := "localhost"
-	port := 5555
-	numberOFRandomTasks := 3
-	//worker.Serve_worker_with_api(host, port)
-	manager.Serve_manager(host, port, numberOFRandomTasks)
+	//host := "localhost"
+	//port := 5555
+	//numberOFRandomTasks := 3
+	//worker.ServeWorkerWithApi(host, port)
+	//manager.ServeManager(host, port, numberOFRandomTasks)
+
+	//whost := os.Getenv("CUBE_WORKER_HOST")
+	//wport, _ := strconv.Atoi(os.Getenv("CUBE_WORKER_PORT"))
+	//
+	//mhost := os.Getenv("CUBE_MANAGER_HOST")
+	//mport, _ := strconv.Atoi(os.Getenv("CUBE_MANAGER_PORT"))
+
+	workerHost := "localhost"
+	workerPort := 5555
+	managerHost := "localhost"
+	managerPort := 5556
+	manager.ServeManagerWithApi(managerHost, managerPort, workerHost, workerPort)
+
 }
 
 //TIP See GoLand help at <a href="https://www.jetbrains.com/help/go/">jetbrains.com/help/go/</a>.

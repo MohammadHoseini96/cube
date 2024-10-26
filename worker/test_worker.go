@@ -1,5 +1,6 @@
 package worker
 
+/*
 import (
 	"cube/task"
 	"fmt"
@@ -7,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"time"
 )
+
 
 func Test_worker_with_state_transition() {
 	db := make(map[uuid.UUID]*task.Task)
@@ -25,6 +27,7 @@ func Test_worker_with_state_transition() {
 
 	fmt.Printf("starting the task: %v\n", t)
 	w.AddTask(t)
+	// change the worker's runTask() to RunTask()
 	result := w.RunTask()
 	if result.Error != nil {
 		panic(result.Error.Error())
@@ -45,3 +48,4 @@ func Test_worker_with_state_transition() {
 	fmt.Printf("task %s is completeed: %s\n", t.Name, result.Result)
 	//todo: use assert functions
 }
+*/

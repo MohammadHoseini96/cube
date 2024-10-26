@@ -8,9 +8,10 @@ import (
 	"time"
 )
 
-func Serve_manager(host string, port int, numTask int) {
-	go worker.Serve_worker_with_api(host, port)
+func ServeManager(host string, port int, numTask int) {
+	go worker.ServeWorkerWithApi(host, port)
 
+	fmt.Println("Starting Cube manager")
 	workers := []string{fmt.Sprintf("%s:%d", host, port)}
 	m := New(workers)
 
@@ -30,13 +31,14 @@ func Serve_manager(host string, port int, numTask int) {
 		m.SendWork()
 	}
 
-	go func() {
-		for {
-			fmt.Printf("[Manager] Updating tasks from %d workers\n", len(m.Workers))
-			m.UpdateTasks()
-			time.Sleep(15 * time.Second)
-		}
-	}()
+	//go func() {
+	//	for {
+	//		fmt.Printf("[Manager] Updating tasks from %d workers\n", len(m.Workers))
+	//		m.UpdateTasks()
+	//		time.Sleep(15 * time.Second)
+	//	}
+	//}()
+	m.UpdateTasks()
 
 	for {
 		for _, t := range m.TaskDb {
@@ -44,5 +46,22 @@ func Serve_manager(host string, port int, numTask int) {
 			time.Sleep(15 * time.Second)
 		}
 	}
+}
 
+func ServeManagerWithApi(managerHost string, managerPort int, workerHost string, workerPort int) {
+	go worker.ServeWorkerWithApi(workerHost, workerPort)
+
+	fmt.Println("Starting Cube manager")
+	workers := []string{fmt.Sprintf("%s:%d", workerHost, workerPort)}
+	m := New(workers)
+	mnagerApi := Api{
+		Address: managerHost,
+		Port:    managerPort,
+		Manager: m,
+	}
+
+	go m.ProcessTasks()
+	go m.UpdateTasks()
+
+	mnagerApi.Star()
 }
