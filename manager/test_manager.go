@@ -54,7 +54,7 @@ func ServeManagerWithApi(managerHost string, managerPort int, workerHost string,
 	fmt.Println("Starting Cube manager")
 	workers := []string{fmt.Sprintf("%s:%d", workerHost, workerPort)}
 	m := New(workers)
-	mnagerApi := Api{
+	managerApi := Api{
 		Address: managerHost,
 		Port:    managerPort,
 		Manager: m,
@@ -62,6 +62,7 @@ func ServeManagerWithApi(managerHost string, managerPort int, workerHost string,
 
 	go m.ProcessTasks()
 	go m.UpdateTasks()
+	go m.DoHealthChecks()
 
-	mnagerApi.Star()
+	managerApi.Star()
 }

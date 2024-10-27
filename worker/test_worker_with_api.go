@@ -25,6 +25,7 @@ func ServeWorkerWithApi(host string, port int) {
 
 	go w.RunTasks()
 	go w.CollectStats()
+	go w.UpdateTasks()
 	api.Start()
 }
 

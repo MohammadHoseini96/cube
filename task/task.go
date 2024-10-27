@@ -15,6 +15,16 @@ import (
 	"time"
 )
 
+/*
+  - A note about Containers Network Mode:
+    default value for NetworkMode: "bridge", we set it to "host" when calling HTTP POST request;
+    so we can use the tim's echo image which was used for chapter 9.
+    warning: if you're using Windows for development,
+    go to DockerDesktop's setting -> Resources -> Network -> Enable host networking
+
+  - We also could remove HostPorts attribute since we are using 'host' mode for NetworkMode;
+    but to keep things in consistent with the book, we keep it.
+*/
 type Task struct {
 	ID            uuid.UUID
 	ContainerID   string
@@ -25,10 +35,14 @@ type Task struct {
 	Memory        int64
 	Disk          int64
 	ExposedPort   nat.PortSet
-	PortBindings  map[string]string
+	PortBindings  nat.PortMap
+	NetworkMode   container.NetworkMode
 	RestartPolicy string
 	StartTime     time.Time
 	FinishTime    time.Time
+	HostPorts     nat.PortMap
+	HealthCheck   string
+	RestartCount  int
 }
 
 type TaskEvent struct {
@@ -44,6 +58,8 @@ type Config struct {
 	AttachStdout  bool
 	AttachStderr  bool
 	ExposedPort   nat.PortSet
+	PortBindings  nat.PortMap
+	NetworkMode   container.NetworkMode
 	Cmd           []string
 	Image         string
 	Cpu           float64
@@ -57,11 +73,13 @@ func NewConfig(t *Task) *Config {
 	return &Config{
 		Name:          t.Name,
 		ExposedPort:   t.ExposedPort,
+		PortBindings:  t.PortBindings,
 		Image:         t.Image,
 		Cpu:           t.Cpu,
 		Memory:        t.Memory,
 		Disk:          t.Disk,
 		RestartPolicy: t.RestartPolicy,
+		NetworkMode:   t.NetworkMode,
 	}
 }
 
@@ -83,6 +101,11 @@ type DockerResult struct {
 	Action      string
 	ContainerId string
 	Result      string
+}
+
+type DockerInspectResponse struct {
+	Error     error
+	Container *types.ContainerJSON
 }
 
 func (d *Docker) Run() DockerResult {
@@ -119,6 +142,8 @@ func (d *Docker) Run() DockerResult {
 		RestartPolicy:   rp,
 		Resources:       r,
 		PublishAllPorts: true,
+		PortBindings:    d.Config.PortBindings,
+		NetworkMode:     d.Config.NetworkMode,
 	}
 
 	resp, err := d.Client.ContainerCreate(ctx, &cc, &hc, nil, nil, d.Config.Name)
@@ -135,6 +160,7 @@ func (d *Docker) Run() DockerResult {
 	out, err := d.Client.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true})
 	if err != nil {
 		log.Printf("Error getting logs for container %s: %v\n", resp.ID, err)
+		return DockerResult{Error: err}
 	}
 
 	stdcopy.StdCopy(os.Stdout, os.Stderr, out)
@@ -168,4 +194,16 @@ func (d *Docker) Stop(id string) DockerResult {
 	}
 
 	return DockerResult{Action: "stop", Result: "success", Error: nil}
+}
+
+func (d *Docker) Inspect(containerId string) DockerInspectResponse {
+	dc, _ := client.NewClientWithOpts(client.FromEnv)
+	ctx := context.Background()
+	resp, err := dc.ContainerInspect(ctx, containerId)
+	if err != nil {
+		log.Printf("Error inspecting container %s: %v\n", containerId, err)
+		return DockerInspectResponse{Error: err}
+	}
+
+	return DockerInspectResponse{Container: &resp}
 }
