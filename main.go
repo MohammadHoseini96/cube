@@ -31,11 +31,15 @@ func main() {
 	//mhost := os.Getenv("CUBE_MANAGER_HOST")
 	//mport, _ := strconv.Atoi(os.Getenv("CUBE_MANAGER_PORT"))
 
-	workerHost := "localhost"
-	workerPort := 5555
 	managerHost := "localhost"
-	managerPort := 5556
-	manager.ServeManagerWithApi(managerHost, managerPort, workerHost, workerPort)
+	managerPort := 5555
+	workerHost := "localhost"
+	workerPort := 5556
+	workerPorts := make(map[int]string)
+	workerPorts[workerPort] = workerHost
+	workerPorts[workerPort+1] = workerHost
+	workerPorts[workerPort+2] = workerHost
+	manager.ServeManagerWithMultipleWorkers(managerHost, managerPort, workerPorts)
 
 }
 

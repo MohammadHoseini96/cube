@@ -13,7 +13,7 @@ func ServeManager(host string, port int, numTask int) {
 
 	fmt.Println("Starting Cube manager")
 	workers := []string{fmt.Sprintf("%s:%d", host, port)}
-	m := New(workers)
+	m := New(workers, "roundrobin")
 
 	for i := 0; i < numTask; i++ {
 		t := task.Task{
@@ -53,7 +53,30 @@ func ServeManagerWithApi(managerHost string, managerPort int, workerHost string,
 
 	fmt.Println("Starting Cube manager")
 	workers := []string{fmt.Sprintf("%s:%d", workerHost, workerPort)}
-	m := New(workers)
+	m := New(workers, "roundrobin")
+	managerApi := Api{
+		Address: managerHost,
+		Port:    managerPort,
+		Manager: m,
+	}
+
+	go m.ProcessTasks()
+	go m.UpdateTasks()
+	go m.DoHealthChecks()
+
+	managerApi.Star()
+}
+
+func ServeManagerWithMultipleWorkers(managerHost string, managerPort int, workersMap map[int]string) {
+	go worker.ServeWorkersWithApi(workersMap)
+
+	fmt.Println("Starting Cube manager")
+
+	var workers []string
+	for workerPort, workerHost := range workersMap {
+		workers = append(workers, fmt.Sprintf("%s:%d", workerHost, workerPort))
+	}
+	m := New(workers, "roundrobin")
 	managerApi := Api{
 		Address: managerHost,
 		Port:    managerPort,

@@ -29,6 +29,24 @@ func ServeWorkerWithApi(host string, port int) {
 	api.Start()
 }
 
+func ServeWorkersWithApi(hostPortMap map[int]string) {
+	for port, host := range hostPortMap {
+		w := Worker{
+			Queue: *queue.New(),
+			Db:    make(map[uuid.UUID]*task.Task),
+		}
+		api := Api{
+			Address: host,
+			Port:    port,
+			Worker:  &w,
+		}
+
+		go w.RunTasks()
+		go w.UpdateTasks()
+		go api.Start()
+	}
+}
+
 //func runTask(w *Worker) {
 //	for {
 //		if w.Queue.Len() != 0 {
