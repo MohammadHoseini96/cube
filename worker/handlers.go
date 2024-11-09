@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"cube/stats"
 	"cube/task"
 	"encoding/json"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func (a *Api) StartTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -72,4 +74,14 @@ func (a *Api) GetStatsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(a.Worker.Stats)
+}
+
+func (a *Api) GetCpuUsageHandler(w http.ResponseWriter, r *http.Request) {
+	interval, _ := strconv.Atoi(chi.URLParam(r, "interval"))
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	usage := stats.CPUUsage{
+		Percentage: stats.CpuUsagePercent(interval),
+	}
+	json.NewEncoder(w).Encode(&usage)
 }

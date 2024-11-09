@@ -6,7 +6,12 @@ import (
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
 	"log"
+	"time"
 )
+
+type CPUUsage struct {
+	Percentage float64 `json:"percentage"`
+}
 
 type Stats struct {
 	MemStats     *mem.VirtualMemoryStat
@@ -65,6 +70,16 @@ func (s *Stats) CpuUsage() float64 {
 	}
 
 	return (total - idle) / total
+}
+
+func CpuUsagePercent(duration int) float64 {
+	interval := time.Duration(duration) * time.Second
+	usage, err := cpu.Percent(interval, false)
+	if err != nil {
+		log.Printf("Error calculating CPU Usage: %v\n", err)
+		return float64(0)
+	}
+	return usage[0]
 }
 
 func GetStats() *Stats {

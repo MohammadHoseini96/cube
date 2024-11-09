@@ -91,17 +91,22 @@ const (
 	LIEB = 1.53960071783900203869
 )
 
+// Score /* Score I'm using a bit different approach than the book and implemented a cpu usage api
 func (e *Epvm) Score(t task.Task, nodes []*node.Node) map[string]float64 {
 	nodeScores := make(map[string]float64)
 	maxJobs := 4.0
 
 	for _, n := range nodes {
-		cpuUsage, err := calculateCpuUsage(n)
+		//cpuUsage, err := calculateCpuUsage(n) //commented approach from the book
+		// in order to fill each node's stats struct internally, we call GetStats method for each node
+		_, _ = n.GetStats()
+		cpuUsage, err := calcCpuUsage(n)
 		if err != nil {
 			log.Printf("error calculating CPU usage for node %s, skipping: %v\n", n.Name, err)
 			continue
 		}
-		cpuLoad := calculateLoad(*cpuUsage, math.Pow(2, 0.8))
+		//cpuLoad := calculateLoad(*cpuUsage, math.Pow(2, 0.8)) // commented approach from the book
+		cpuLoad := calculateLoad(cpuUsage, math.Pow(2, 0.8))
 
 		memoryAllocated := float64(n.Stats.MemUsedKb()) + float64(n.MemoryAllocated)
 		memoryPercentAllocated := memoryAllocated / float64(n.Memory)
@@ -193,4 +198,13 @@ func calculateCpuUsage(n *node.Node) (*float64, error) {
 		cpuPercentUsage = (float64(total) - float64(idle)) / float64(total)
 	}
 	return &cpuPercentUsage, nil
+}
+
+func calcCpuUsage(n *node.Node) (float64, error) {
+	//stat1 := getNodeStats(n)
+	cpuUsage, err := n.GetCpuUsage()
+	if err != nil {
+		return 0, err
+	}
+	return cpuUsage, nil
 }

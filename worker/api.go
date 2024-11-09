@@ -29,6 +29,7 @@ func (a *Api) initRouter() {
 	})
 	a.Router.Route("/stats", func(r chi.Router) {
 		r.Get("/", a.GetStatsHandler)
+		r.Get("/cpu-usage/{interval}", a.GetCpuUsageHandler)
 	})
 }
 
