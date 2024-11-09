@@ -42,6 +42,7 @@ func ServeWorkersWithApi(hostPortMap map[int]string) {
 		}
 
 		go w.RunTasks()
+		go w.CollectStats()
 		go w.UpdateTasks()
 		go api.Start()
 	}

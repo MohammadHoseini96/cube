@@ -1,4 +1,4 @@
-package worker
+package stats
 
 import (
 	"github.com/shirou/gopsutil/cpu"
@@ -37,7 +37,7 @@ func (s *Stats) DiskTotal() uint64 {
 	return s.DiskStats.Total
 }
 
-func (s *Stats) DiskAvailable() uint64 {
+func (s *Stats) DiskFree() uint64 {
 	return s.DiskStats.Free
 }
 

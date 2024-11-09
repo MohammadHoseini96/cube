@@ -76,7 +76,7 @@ func ServeManagerWithMultipleWorkers(managerHost string, managerPort int, worker
 	for workerPort, workerHost := range workersMap {
 		workers = append(workers, fmt.Sprintf("%s:%d", workerHost, workerPort))
 	}
-	m := New(workers, "roundrobin")
+	m := New(workers, "epvm")
 	managerApi := Api{
 		Address: managerHost,
 		Port:    managerPort,
