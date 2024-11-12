@@ -39,7 +39,7 @@ func main() {
 	workerPorts[workerPort] = workerHost
 	workerPorts[workerPort+1] = workerHost
 	workerPorts[workerPort+2] = workerHost
-	manager.ServeManagerWithMultipleWorkers(managerHost, managerPort, workerPorts)
+	manager.ServeManagerWithMultipleWorkers(managerHost, managerPort, workerPorts, "persistent")
 
 }
 

@@ -52,23 +52,24 @@ func (a *Api) StopTaskHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	taskToStop, ok := a.Manager.TaskDb[tID]
-	if !ok {
+	taskToStop, err := a.Manager.TaskDb.Get(tID.String())
+	if err != nil {
 		log.Printf("Task not found %v\n", tID)
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 
-	taskCopy := *taskToStop
-	taskCopy.State = task.Completed
+	taskCopy := taskToStop.(*task.Task)
+	//taskCopy.State = task.Completed
 
 	te := task.TaskEvent{
 		ID:        uuid.New(),
 		State:     task.Completed,
 		Timestamp: time.Now(),
-		Task:      taskCopy,
+		Task:      *taskCopy,
 	}
 	a.Manager.AddTask(te)
 
-	log.Printf("Added task event %v to stop task %v\n", te.ID, taskToStop.ID)
+	log.Printf("Added task event %v to stop task %v\n", te.ID, taskCopy.ID)
 	w.WriteHeader(http.StatusNoContent)
 }

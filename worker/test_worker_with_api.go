@@ -1,10 +1,9 @@
 package worker
 
 import (
-	"cube/task"
+	"cube/store"
 	"fmt"
 	"github.com/golang-collections/collections/queue"
-	"github.com/google/uuid"
 )
 
 func ServeWorkerWithApi(host string, port int) {
@@ -15,7 +14,7 @@ func ServeWorkerWithApi(host string, port int) {
 
 	w := Worker{
 		Queue: *queue.New(),
-		Db:    make(map[uuid.UUID]*task.Task),
+		Db:    store.NewInMemoryTaskStore(),
 	}
 	api := Api{
 		Address: host,
@@ -29,22 +28,25 @@ func ServeWorkerWithApi(host string, port int) {
 	api.Start()
 }
 
-func ServeWorkersWithApi(hostPortMap map[int]string) {
+func ServeWorkersWithApi(hostPortMap map[int]string, dbType string) {
+	idx := 1
 	for port, host := range hostPortMap {
-		w := Worker{
-			Queue: *queue.New(),
-			Db:    make(map[uuid.UUID]*task.Task),
-		}
+		//w := Worker{
+		//	Queue: *queue.New(),
+		//	Db:    store.NewInMemoryTaskStore(),
+		//}
+		w := New(fmt.Sprintf("worker-%d", idx), dbType)
 		api := Api{
 			Address: host,
 			Port:    port,
-			Worker:  &w,
+			Worker:  w,
 		}
 
 		go w.RunTasks()
 		go w.CollectStats()
 		go w.UpdateTasks()
 		go api.Start()
+		idx++
 	}
 }
 

@@ -13,7 +13,7 @@ func ServeManager(host string, port int, numTask int) {
 
 	fmt.Println("Starting Cube manager")
 	workers := []string{fmt.Sprintf("%s:%d", host, port)}
-	m := New(workers, "roundrobin")
+	m := New(workers, "roundrobin", "memory")
 
 	for i := 0; i < numTask; i++ {
 		t := task.Task{
@@ -41,7 +41,9 @@ func ServeManager(host string, port int, numTask int) {
 	m.UpdateTasks()
 
 	for {
-		for _, t := range m.TaskDb {
+		taskList, _ := m.TaskDb.List()
+		tasks := taskList.([]task.Task)
+		for _, t := range tasks {
 			fmt.Printf("[Manager] Task id: %s, state: %d\n", t.ID, t.State)
 			time.Sleep(15 * time.Second)
 		}
@@ -53,7 +55,7 @@ func ServeManagerWithApi(managerHost string, managerPort int, workerHost string,
 
 	fmt.Println("Starting Cube manager")
 	workers := []string{fmt.Sprintf("%s:%d", workerHost, workerPort)}
-	m := New(workers, "roundrobin")
+	m := New(workers, "roundrobin", "memory")
 	managerApi := Api{
 		Address: managerHost,
 		Port:    managerPort,
@@ -67,8 +69,8 @@ func ServeManagerWithApi(managerHost string, managerPort int, workerHost string,
 	managerApi.Star()
 }
 
-func ServeManagerWithMultipleWorkers(managerHost string, managerPort int, workersMap map[int]string) {
-	go worker.ServeWorkersWithApi(workersMap)
+func ServeManagerWithMultipleWorkers(managerHost string, managerPort int, workersMap map[int]string, dbType string) {
+	go worker.ServeWorkersWithApi(workersMap, dbType)
 
 	fmt.Println("Starting Cube manager")
 
@@ -76,7 +78,7 @@ func ServeManagerWithMultipleWorkers(managerHost string, managerPort int, worker
 	for workerPort, workerHost := range workersMap {
 		workers = append(workers, fmt.Sprintf("%s:%d", workerHost, workerPort))
 	}
-	m := New(workers, "epvm")
+	m := New(workers, "epvm", dbType)
 	managerApi := Api{
 		Address: managerHost,
 		Port:    managerPort,
