@@ -66,7 +66,7 @@ func ServeManagerWithApi(managerHost string, managerPort int, workerHost string,
 	go m.UpdateTasks()
 	go m.DoHealthChecks()
 
-	managerApi.Star()
+	managerApi.Start()
 }
 
 func ServeManagerWithMultipleWorkers(managerHost string, managerPort int, workersMap map[int]string, dbType string) {
@@ -89,5 +89,5 @@ func ServeManagerWithMultipleWorkers(managerHost string, managerPort int, worker
 	go m.UpdateTasks()
 	go m.DoHealthChecks()
 
-	managerApi.Star()
+	managerApi.Start()
 }

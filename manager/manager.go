@@ -395,3 +395,17 @@ func (m *Manager) restartTask(t *task.Task) {
 	}
 	log.Printf("Task %v was set to Scheduled state and sent via POST request. \n", t)
 }
+
+// UpdateNodeStats TODO: is this method really necessary since the scheduler is calling node.GetStats() itself?
+func (m *Manager) UpdateNodeStats() {
+	for {
+		for _, n := range m.WorkerNodes {
+			log.Printf("Collecting stats for node %v", n.Name)
+			_, err := n.GetStats()
+			if err != nil {
+				log.Printf("error updating node stats: %v", err)
+			}
+		}
+		time.Sleep(15 * time.Second)
+	}
+}

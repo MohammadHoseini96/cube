@@ -45,21 +45,21 @@ func (a *Api) InspectTaskHandler(w http.ResponseWriter, r *http.Request) {
 	taskID := chi.URLParam(r, "taskID")
 	if taskID == "" {
 		log.Printf("No taskID passed in request.\n")
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 	}
 
 	tID, _ := uuid.Parse(taskID)
 	t, err := a.Worker.Db.Get(tID.String())
 	if err != nil {
 		log.Printf("No task with ID %v found", tID)
-		w.WriteHeader(404)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	resp := a.Worker.InspectTask(t.(task.Task))
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp.Container)
 
 }
@@ -95,8 +95,15 @@ func (a *Api) StopTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 func (a *Api) GetStatsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	if a.Worker.Stats != nil {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(*a.Worker.Stats)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(a.Worker.Stats)
+	stats := stats.GetStats()
+	json.NewEncoder(w).Encode(stats)
 }
 
 func (a *Api) GetCpuUsageHandler(w http.ResponseWriter, r *http.Request) {

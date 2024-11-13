@@ -4,6 +4,8 @@ import (
 	"cube/store"
 	"fmt"
 	"github.com/golang-collections/collections/queue"
+	"strconv"
+	"strings"
 )
 
 func ServeWorkerWithApi(host string, port int) {
@@ -47,6 +49,29 @@ func ServeWorkersWithApi(hostPortMap map[int]string, dbType string) {
 		go w.UpdateTasks()
 		go api.Start()
 		idx++
+	}
+}
+
+func ServeWorkersByAddressWithApi(workers []string, dbType string) {
+	for idx, address := range workers {
+		//w := Worker{
+		//	Queue: *queue.New(),
+		//	Db:    store.NewInMemoryTaskStore(),
+		//}
+		addr := strings.Split(address, ":")
+		host := addr[0]
+		port, _ := strconv.Atoi(addr[1])
+		w := New(fmt.Sprintf("worker-%d", idx+1), dbType)
+		api := Api{
+			Address: host,
+			Port:    port,
+			Worker:  w,
+		}
+
+		go w.RunTasks()
+		go w.CollectStats()
+		go w.UpdateTasks()
+		go api.Start()
 	}
 }
 

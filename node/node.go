@@ -33,6 +33,8 @@ func NewNode(name string, api string, role string) *Node {
 	}
 }
 
+// GetStats TODO: TaskCount needs to be updated, so we can show it when using node command from the cmd package.
+// Stats.TaskCount also requires such change.
 func (n *Node) GetStats() (*stats.Stats, error) {
 	var resp *http.Response
 	var err error

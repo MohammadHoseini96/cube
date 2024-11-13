@@ -2,6 +2,10 @@ package task
 
 type State int
 
+func (s State) String() []string {
+	return []string{"Pending", "Scheduled", "Running", "Completed", "Failed"}
+}
+
 const (
 	Pending State = iota
 	Scheduled
@@ -15,7 +19,7 @@ var stateTransitionMap = map[State][]State{
 	Scheduled: []State{Scheduled, Running, Failed},
 	Running:   []State{Running, Completed, Failed},
 	Completed: []State{},
-	Failed:    []State{},
+	Failed:    []State{Scheduled},
 }
 
 func Contains(states []State, state State) bool {
